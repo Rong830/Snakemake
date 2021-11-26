@@ -1,0 +1,32 @@
+samples = ["6991"]
+kmers = range(19, 32, 2)
+
+rule all_kmer_stats:
+    input: 
+      expand("snakeout/{s}_paired_k{k}_contigs_stats.txt", \
+        s=samples, k=kmers )
+    output:
+      "snakeout/all_stats.txt"
+    shell:
+      "grep -H 'contig N/L50' {input} > {output}"
+
+
+rule assemble:
+    output: "snakeout/{sample}_paired_k{kmer}_contigs.fa"
+    input:
+      read1 = "/localdisk/data/BPSM/Lecture20/{sample}_1.fastq.gz",
+      read2 = "/localdisk/data/BPSM/Lecture20/{sample}_2.fastq.gz"
+    shell:
+      r"""velveth VOUT {wildcards.kmer} -shortPaired -fastq -separate {input.read1} {input.read2}
+      velvetg VOUT
+      mv VOUT/contigs.fa {output}
+       """
+
+rule stats:
+    output: 
+      full    = "snakeout/{assembly}_contigs_stats.txt",
+      grepped = "snakeout/{assembly}_contigs_stats_grepped.txt"
+    input:  "snakeout/{assembly}_contigs.fa"
+    shell:
+      """stats.sh {input} > {output.full} 
+       stats.sh {input} | grep contig > {output.grepped}"""

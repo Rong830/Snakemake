@@ -1,0 +1,16 @@
+rule assemble:
+    output: "{sample}_paired_k21_contigs.fa"
+    input:
+      read1 = "/localdisk/data/BPSM/Lecture20/{sample}_1.fastq.gz",
+      read2 = "/localdisk/data/BPSM/Lecture20/{sample}_2.fastq.gz"
+    shell:
+      r"""velveth paired_k21 21 -shortPaired -fastq -separate {input.read1} {input.read2}
+      velvetg paired_k21
+      mv paired_k21/contigs.fa {output}
+       """
+
+rule stats:
+    output: "{assem}_contigs_stats.txt"
+    input:  "{assem}_paired_k21_contigs.fa"
+    shell:
+      "stats.sh {input} > {output}"

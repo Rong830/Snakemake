@@ -1,0 +1,11 @@
+rule plot:
+    output: "{dataset}_plot.pdf"
+    input:  "{dataset}.csv"
+    shell:
+      "./myplotter.py -o {output} {input}"
+
+rule filter:
+    output: "{csvdata}_filtered.csv"
+    input:  "{csvdata}.csv"
+    shell:
+      "egrep -v ^boring {input} > {output}"
